@@ -1,0 +1,131 @@
+//Ионов Георгий
+
+#include <stdio.h>
+#include <stdbool.h>
+#define arrLength 100
+
+void swap(int *a, int *b) {
+    int t = *a;
+    *a = *b;
+    *b = t;
+}
+
+// Распечатываем массив
+void print(int N, int *a)
+{
+    int i;
+    for(i = 0; i < N; i++)
+    {
+        printf("%6i", a[i]);
+    }
+    printf("\n");
+}
+
+//Пузырьковая
+int SortB(int arrElemNumber, int *arr){
+    puts("Array before sort");
+    print(arrElemNumber, arr);
+
+    int counter=0;
+    for(int b = 0; b < arrElemNumber; b++){
+        counter++;
+    	for(int i = 0; i < arrElemNumber - 1; i++)
+    	{
+    	    counter++;
+    		if (arr[i] > arr[i+1])
+    	    {
+    	        counter++;
+    			swap(&arr[i], &arr[i + 1]);
+    	    }
+    	}
+    }
+
+    puts("Array after sort");
+    print(arrElemNumber, arr);
+
+    return counter;
+
+}
+
+//Пузырьковая оптимизированная
+int SortBOpt(int arrElemNumber, int *arr){
+    puts("Array before sort");
+    print(arrElemNumber, arr);
+
+    bool flag = true;
+    int counter=0;
+    for(int b = 0; b < arrElemNumber; b++){
+        counter++;
+        flag = true;
+    	for(int i = 0; i < arrElemNumber - 1; i++)
+    	{
+    	    counter++;
+    		if (arr[i] > arr[i+1])
+    	    {
+    	        counter++;
+    			swap(&arr[i], &arr[i + 1]);
+    			flag = false;
+    	    }
+    	}
+    	if (flag) {
+    	    break;
+    	}
+    }
+
+    puts("Array after sort");
+    print(arrElemNumber, arr);
+
+    return counter;
+
+}
+
+
+//Бинарный поиск
+int BinarySearch(int *arr, int length, int value){
+
+	int LeftBorder = 0;
+	int RightBorder = length - 1;
+	int middle = LeftBorder+(RightBorder-1)/2;
+	while(LeftBorder <= RightBorder && arr[middle] != value)
+	{
+		if (arr[middle] < value){
+			LeftBorder = middle + 1;
+		}
+		else
+		{
+			RightBorder = middle - 1;
+		}
+		middle = LeftBorder + (RightBorder - LeftBorder) / 2;
+	}
+	if (arr[middle] == value){
+		return middle;
+	}
+	else
+	{
+		return -1;
+	}
+
+
+}
+
+int main(int argc, char *argv[]) {
+
+    int arr[arrLength] = { 1, 10, 3, 5, 8, 9, 2, 4, 11, 12 }; // создаём массив максимального размера
+    int arrElemNumber = 10;
+    int counter = 0;
+
+    printf("Пузырьковая: \n");
+    counter = SortB(arrElemNumber, arr);
+    printf("Количество операций сравнения: %d\n\n", counter);
+
+    printf("Оптимизированная пузырьковая: \n");
+    
+    int arr2[arrLength] = { 1, 10, 3, 5, 8, 9, 2, 4, 11, 12 }; // создаём массив максимального размера
+    counter = SortBOpt(arrElemNumber, arr2);
+    printf("Количество операций сравнения: %d\n\n", counter);
+    
+    int value = 2;
+    printf("Бинарный поиск индекс искомого элемента: %d\n\n", BinarySearch(arr2, arrElemNumber, value));
+
+    return 0;
+}
