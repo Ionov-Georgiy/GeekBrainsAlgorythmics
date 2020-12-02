@@ -1,0 +1,233 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#define Max 1000
+
+char Queue[Max];
+
+//Number to insert
+int QueueIN = 0;
+//Number to out
+int QueueON = 0;
+bool QueueIsReversed = false;
+
+void EnQueue (char value){
+	if(QueueIsReversed){
+		if(QueueIN < QueueON){
+			Queue[QueueIN++] = value;
+		}else{
+			printf("Queue overflow\n");
+		}
+	}else{
+		if(QueueIN < Max){
+			Queue[QueueIN++] = value;
+		}else{
+			QueueIN -= Max;
+			QueueIsReversed = !QueueIsReversed;
+			EnQueue(value);
+		}
+	}
+}
+
+char DeQueue (){
+	if(QueueIsReversed){
+		if(QueueON < Max){
+			return Queue[QueueON++];
+		}else{
+			QueueON -= Max;
+			QueueIsReversed = !QueueIsReversed;
+			return DeQueue();
+		}
+	}else{
+		if(QueueON < QueueIN){
+			return Queue[QueueON++];
+		}else{
+			printf("Queue is empty\n");
+			return '0';
+		}
+	}
+}
+
+struct Stack {
+    int curIndex;
+    char arr[Max];
+};
+
+void Push(char value, struct Stack * curStack){
+    curStack->curIndex++;
+    if (curStack->curIndex < Max)
+    {
+    	curStack->arr[curStack->curIndex] = value;
+    }
+    	else
+    {
+    	curStack->curIndex--;
+    	printf("Stack overflow!\n");
+    }
+}
+
+char Pop(struct Stack * curStack){
+    if (curStack->curIndex > -1)
+    {
+        return curStack->arr[curStack->curIndex--];
+    }
+    else
+    {
+    	printf("Stack is empty!\n");
+        return '0';
+    }
+}
+
+bool StackIsEmpty(struct Stack * curStack){
+
+    if(curStack->curIndex < 0){
+        return true;
+    }
+    return false;
+}
+
+int isNumber(char ch){
+    if(ch > '0' && ch <= '9'){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+int GetOperatorPriority(char op){
+
+    if(op == '/' || op == '*'){
+        return 1;
+    }
+    else if(op == '+' || op == '-'){
+        return 0;
+    }
+    return 0;
+}
+
+char * InfixToPostfix(char infixExp[]){
+
+	static char postfixExp[Max];
+
+    int postfixCurrIndex = 0;
+    struct Stack postfixOperatorStack;
+    postfixOperatorStack.curIndex = -1;
+
+    int selectedCharIndex = 0;
+    char SelectedChar;
+
+    while (selectedCharIndex < strlen(infixExp))
+    {
+        SelectedChar = infixExp[selectedCharIndex];
+
+        if (SelectedChar == '(')
+        {
+            Push(SelectedChar, &postfixOperatorStack);
+            selectedCharIndex++;
+            continue;
+        }else if (SelectedChar == ')')
+        {
+            char PrevOperator = Pop(&postfixOperatorStack);
+
+            while (PrevOperator != '(')
+            {
+                postfixExp[postfixCurrIndex++] = PrevOperator;
+                postfixExp[postfixCurrIndex++] = ' ';
+                PrevOperator = Pop(&postfixOperatorStack);
+            }
+            selectedCharIndex++;
+            continue;
+        }
+        if (isNumber(SelectedChar))
+        {
+            postfixExp[postfixCurrIndex++] = SelectedChar;
+            if(selectedCharIndex < strlen(infixExp)-1)
+            {
+                if (!isNumber(infixExp[selectedCharIndex + 1]))
+                {
+                    postfixExp[postfixCurrIndex++] = ' ';
+                }
+            } else
+            {
+                postfixExp[postfixCurrIndex++] = ' ';
+            }
+        }
+        else if (StackIsEmpty(&postfixOperatorStack))
+        {
+            Push(SelectedChar, &postfixOperatorStack);
+        }
+        else
+        {
+            char PrevOperator = Pop(&postfixOperatorStack);
+
+            if (PrevOperator == '(') {
+                Push(PrevOperator, &postfixOperatorStack);
+                Push(SelectedChar, &postfixOperatorStack);
+                selectedCharIndex++;
+                continue;
+            }
+            if (GetOperatorPriority(PrevOperator) > GetOperatorPriority(SelectedChar))
+            {
+                while ((GetOperatorPriority(PrevOperator) >= GetOperatorPriority(SelectedChar)))
+                {
+                    postfixExp[postfixCurrIndex++] = PrevOperator;
+                    postfixExp[postfixCurrIndex++] = ' ';
+                    if (!StackIsEmpty(&postfixOperatorStack))
+                    {
+                        PrevOperator = Pop(&postfixOperatorStack);
+                    }
+                    else
+                    {
+                        Push(SelectedChar, &postfixOperatorStack);
+                        break;
+                    }
+                }
+            }
+            else if (GetOperatorPriority(PrevOperator) == GetOperatorPriority(SelectedChar))
+            {
+                postfixExp[postfixCurrIndex++] = PrevOperator;
+                postfixExp[postfixCurrIndex++] = ' ';
+                Push(SelectedChar, &postfixOperatorStack);
+            }
+            else
+            {
+                Push(PrevOperator, &postfixOperatorStack);
+                Push(SelectedChar, &postfixOperatorStack);
+            }
+        }
+
+        selectedCharIndex++;
+    }
+    while (!StackIsEmpty(&postfixOperatorStack))
+    {
+        postfixExp[postfixCurrIndex++] = Pop(&postfixOperatorStack);
+        postfixExp[postfixCurrIndex++] = ' ';
+    }
+    printf("%s\n", postfixExp);
+
+    return postfixExp;
+}
+
+int main()
+{
+
+	//6. *Реализовать очередь.
+	EnQueue('a');
+	EnQueue('b');
+	EnQueue('c');
+	EnQueue('d');
+	printf("%c\n", DeQueue());
+	printf("%c\n", DeQueue());
+	printf("%c\n", DeQueue());
+	printf("%c\n", DeQueue());
+	printf("%c\n", DeQueue());
+
+	
+    //5. **Реализовать алгоритм перевода из инфиксной записи арифметического выражения в постфиксную.
+    char infixExp[Max] = "94/(11+23)*(35+(64-578))";
+    char * postfixExp = InfixToPostfix(infixExp);
+    printf("%s\n", postfixExp);
+
+    return 0;
+}
